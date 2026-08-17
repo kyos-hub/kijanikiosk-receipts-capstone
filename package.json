@@ -1,0 +1,19 @@
+{
+  "name": "kijanikiosk-receipts",
+  "version": "1.0.0",
+  "description": "KijaniKiosk serverless receipt chain (Capstone, Track B)",
+  "scripts": {
+    "offline": "serverless offline",
+    "test": "node tests/local-chain-test.js",
+    "deploy:staging": "serverless deploy --stage staging",
+    "deploy:prod": "serverless deploy --stage prod",
+    "info:staging": "serverless info --stage staging"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.600.0"
+  },
+  "devDependencies": {
+    "serverless": "^3.38.0",
+    "serverless-offline": "^13.3.0"
+  }
+}
