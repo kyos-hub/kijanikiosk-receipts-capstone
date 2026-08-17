@@ -1,0 +1,59 @@
+service: kijanikiosk-receipts
+
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  region: us-east-1
+  stage: ${opt:stage, 'dev'}
+  environment:
+    STAGE: ${self:provider.stage}
+    RAW_BUCKET: kk-payments-receipts-${self:provider.stage}-${aws:accountId}
+    PROCESSED_BUCKET: kk-processor-output-${self:provider.stage}-${aws:accountId}
+    NOTIFIED_BUCKET: kk-notifier-output-${self:provider.stage}-${aws:accountId}
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - s3:GetObject
+            - s3:PutObject
+            - s3:ListBucket
+          Resource:
+            - arn:aws:s3:::kk-payments-receipts-${self:provider.stage}-${aws:accountId}/*
+            - arn:aws:s3:::kk-processor-output-${self:provider.stage}-${aws:accountId}/*
+            - arn:aws:s3:::kk-notifier-output-${self:provider.stage}-${aws:accountId}/*
+            - arn:aws:s3:::kk-payments-receipts-${self:provider.stage}-${aws:accountId}
+            - arn:aws:s3:::kk-processor-output-${self:provider.stage}-${aws:accountId}
+            - arn:aws:s3:::kk-notifier-output-${self:provider.stage}-${aws:accountId}
+
+functions:
+  kk-processor:
+    handler: functions/kk-processor/handler.main
+    events:
+      - s3:
+          bucket: kk-payments-receipts-${self:provider.stage}-${aws:accountId}
+          event: s3:ObjectCreated:*
+    destinations:
+      onSuccess: kk-logs
+
+  kk-notifier:
+    handler: functions/kk-notifier/handler.main
+    events:
+      - s3:
+          bucket: kk-processor-output-${self:provider.stage}-${aws:accountId}
+          event: s3:ObjectCreated:*
+
+  kk-logs:
+    handler: functions/kk-logs/handler.main
+
+  kk-analytics:
+    handler: functions/kk-analytics/handler.main
+    events:
+      - s3:
+          bucket: kk-notifier-output-${self:provider.stage}-${aws:accountId}
+          event: s3:ObjectCreated:*
+
+plugins:
+  - serverless-offline
