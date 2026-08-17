@@ -44,7 +44,7 @@ rollup/aggregation layer exists over the receipt event stream.
    with the production stage gated behind a visible manual approval.
 
 ## Architecture
-See `docs/architecture.png` (to be exported from the diagram below).
+See `docs/architecture.png` (exported from the diagram below).
 
 ```
 kk-payments (K8s, existing)
