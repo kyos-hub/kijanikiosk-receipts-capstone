@@ -3,30 +3,32 @@ pipeline {
 
     environment {
         AWS_DEFAULT_REGION = 'us-east-1'
+        AWS_ACCESS_KEY_ID = credentials('aws-access-key-id')
+        AWS_SECRET_ACCESS_KEY = credentials('aws-secret-access-key')
     }
 
     stages {
         stage('Install') {
             steps {
-                sh 'npm ci'
+                sh 'npm install --ignore-scripts'
             }
         }
 
         stage('Local Chain Test') {
             steps {
-                sh 'npm test'
+                sh 'node tests/local-chain-test.js'
             }
         }
 
         stage('Deploy to Staging') {
             steps {
-                sh 'npx serverless deploy --stage staging'
+                sh 'npx --no-install serverless deploy --stage staging'
             }
         }
 
         stage('Smoke Check: Staging Info') {
             steps {
-                sh 'npx serverless info --stage staging'
+                sh 'npx --no-install serverless info --stage staging'
             }
         }
 
@@ -45,7 +47,7 @@ pipeline {
 
         stage('Deploy to Production') {
             steps {
-                sh 'npx serverless deploy --stage prod'
+                sh 'npx --no-install serverless deploy --stage prod'
             }
         }
     }
