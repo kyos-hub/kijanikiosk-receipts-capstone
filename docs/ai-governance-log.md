@@ -74,6 +74,38 @@ contribution — do not skip step 4.*
 
 ---
 
+## Entry 4
+
+1. **Component**: `package.json` — the `serverless-offline` dependency and
+   the capstone's approach to local development verification.
+2. **Prompt/task given to AI**: "Get `serverless offline` running locally
+   so local development is verified per the assignment spec."
+3. **What the AI produced**: Repeated attempts to pin different
+   `serverless-offline` versions (13.x, 12.0.4, 11.6.0) to work around an
+   ESM/CommonJS `require()` incompatibility with the installed Node version.
+4. **What it got wrong**: Never questioned whether `serverless-offline` was
+   the right tool in the first place. `serverless-offline` emulates
+   API Gateway / HTTP-triggered Lambdas — it does not simulate S3
+   `ObjectCreated` events, which is what every function in this chain
+   actually runs on. Even a working install would not have exercised the
+   real trigger path.
+5. **Specific change the reviewer made**: Stopped chasing version pins.
+   `tests/local-chain-test.js` — a custom harness that stubs the S3 client
+   and drives the real S3-event payload shape through all four handlers —
+   is the correct local-development verification tool for this
+   architecture, and was already in place and passing before this detour
+   started.
+6. **Governance checklist item referenced**: Control 3 (Tooling
+   Appropriateness) — using the "expected" tool for the job without
+   checking it fits the actual trigger model.
+7. **Verification method**: Confirmed `tests/local-chain-test.js` already
+   exercises the full S3-event-shaped chain end-to-end (see Entry 1-3
+   history) and does so faster and more accurately than an HTTP emulator
+   ever could for this service.
+8. **Reviewer**: Abel
+
+---
+
 ## Entry 3
 
 1. **Component**: `serverless.yml` and `functions/kk-logs/handler.js` — the
